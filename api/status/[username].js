@@ -29,12 +29,18 @@
  *  SOFTWARE.
  *  /////////////////////////////////////////////////////////////////////////////
  */
-import { createCanvas, loadImage } from '@napi-rs/canvas';
+import { createCanvas, loadImage, GlobalFonts } from '@napi-rs/canvas';
+import path from 'path';
 export default async function handler(req, res) {
   try {
     const { username } = req.query;
     if (!username) {
       return res.status(400).json({ error: 'username parameter is required' });
+    }
+    try {
+      GlobalFonts.registerFromPath(path.join(process.cwd(), 'public/fonts/arial.ttf'), 'Arial');
+    } catch (fontError) {
+      console.log('custom font not found, using system defaults');
     }
     const userResponse = await fetch(`https://users.roblox.com/v1/usernames/users`, {
       method: 'POST',
