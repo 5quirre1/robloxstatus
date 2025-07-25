@@ -40,7 +40,7 @@ export default async function handler(req, res) {
     try {
       GlobalFonts.registerFromPath(path.join(process.cwd(), 'public/fonts/arial.ttf'), 'Arial');
     } catch (fontError) {
-      console.log('custom font not found, using system defaults');
+      console.log('Custom font not found, using system defaults');
     }
     const userResponse = await fetch(`https://users.roblox.com/v1/usernames/users`, {
       method: 'POST',
@@ -110,6 +110,7 @@ export default async function handler(req, res) {
       }
     }
     const isOnline = userPresence.userPresenceType === 1 || userPresence.userPresenceType === 2;
+    const isPlaying = userPresence.userPresenceType === 2;
     const statusColor = isOnline ? '#00ff00' : '#ff4444';
     ctx.beginPath();
     ctx.arc(125, 65, 15, 0, Math.PI * 2, true);
@@ -132,7 +133,8 @@ export default async function handler(req, res) {
     ctx.fillStyle = '#ffffff';
     let statusText = isOnline ? 'Online' : 'Offline';
     ctx.fillText(`Status: ${statusText}`, 180, 115);
-    if (isOnline && userPresence.placeId) {
+    // ts is NOT working, i don't know why gamename and shit isn't workomgh sob
+    if (isPlaying) {
       try {
         const gameResponse = await fetch(`https://games.roblox.com/v1/games?universeIds=${userPresence.universeId}`);
         const gameData = await gameResponse.json();
@@ -141,6 +143,7 @@ export default async function handler(req, res) {
         ctx.fillStyle = '#90EE90';
         ctx.fillText(`Playing: ${gameName}`, 180, 140);
       } catch (error) {
+        console.error(error);
         ctx.font = '16px Arial';
         ctx.fillStyle = '#90EE90';
         ctx.fillText('Playing a game', 180, 140);
@@ -152,7 +155,7 @@ export default async function handler(req, res) {
     } else {
       ctx.font = '16px Arial';
       ctx.fillStyle = '#ff9999';
-      ctx.fillText('Not playing', 180, 140);
+      ctx.fillText('Not playing || offline', 180, 140);
     }
     ctx.font = 'bold 12px Arial';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
